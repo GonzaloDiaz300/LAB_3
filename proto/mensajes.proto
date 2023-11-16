@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "github.com/GonzaloDiaz300/LAB_3/proto";
+
+message RequestInformantes{
+    string peticion = 1;
+    string comando = 2;
+    string nombre_sector = 3;
+    string nombre_base = 4;
+    string valor_opcional = 5;
+}
+/*
+Si la peticion = normal entonces se redirige al informate con un servidor aleatorio(ver uso de probabilidad en codigo tarea 2)
+
+Si la peticion = actualizado entonces el informante detecto que el reloj que recibio del 
+servidor al que lo conectaron no esta actualizado por lo tanto calcula cual servidor es el
+mas actualizado y conecta al informante a este
+*/
+
+message ResponseInformantes{
+    string direccion = 1;
+}
+/*
+Lo manda el broker a los informantes o la vanguardia
+*/
+
+message ResponseServidoresInformantes{
+    int relojx = 1;
+    int relojy = 2;
+    int relojz = 3;
+}
+
+/*
+Lo que devuelve el reloj
+*/
+
+message RequestVanguardia{
+    string peticion = 1;
+    string nombre_sector = 3;
+    string nombre_base = 4;
+}
+
+message ResponseServidoresVanguardia{
+    repeated string soldados = 1;
+    int relojx = 2;
+    int relojy = 3;
+    int relojz = 4;
+}
+/*
+Peticion funciona igual a los informantes pero como es un unico comando se pueden 
+ahorrar campos.
+*/
+
+service Querys{
+    rpc CreateComando(RequestInformantes) returns (ResponseInformantes);
+    rpc ComandoAServidor(RequestInformantes) returns (ResponseServidoresInformantes);
+    //Informante → Broker luego Informante → Servidor
+
+    rpc CreateLectura(RequestInformantes) returns (ResponseServidoresVanguardia);
+    rpc LecturaAServidor(RequestInformantes) returns (ResponseServidoresVanguardia);
+    //Vanguardia → Broker luego Broker → Servidor luego Broker → Vanguardia
+
+    rpc PropagarCambiosPeriodicamente(RequestInformantes) returns (ResponseInformantes);
+    //Entre los servidores se reenvian las peticiones que les llegan luego que pasa 1 min
+}
